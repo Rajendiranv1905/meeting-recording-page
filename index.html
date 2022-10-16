@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Meeting</title>
+
+    <script type="module">
+        import {
+            HMSReactiveStore,
+            selectIsConnectedToRoom,
+            selectPeers
+        } from "https://cdn.skypack.dev/@100mslive/hms-video-store";
+
+        try {
+            // Initialize HMS Store
+            const hmsManager = new HMSReactiveStore();
+            hmsManager.triggerOnSubscribe();
+            const hmsStore = hmsManager.getStore();
+            const hmsActions = hmsManager.getHMSActions();
+
+            function onConnection(isConnected) {
+                if (isConnected) {
+                    hmsStore.subscribe(renderPeers, selectPeers); // select all peers
+                }
+            }
+
+            function renderPeers(peers) {
+                console.log(peers, "peers init");
+
+                if (peers) {
+                    // this allows us to make peer list an optional argument
+                    peers = hmsStore.getState(selectPeers);
+                    console.log(peers, "peers peers");
+
+                    const hostVideoPeer = peers.find((peer) => peer.roleName === "host" && !peer.isLocal && peer.name === "raj");
+
+                    if (!hostVideoPeer) {
+                        console.log("peer not found");
+                        return;
+                    }
+
+                    const videoPlayer = document.getElementById("meetingId");
+                    videoPlayer.innerHTML = "";
+
+                    const videoElement = document.createElement('video');
+                    // videoElement.setAttribute("autoplay", "true");
+                    // videoElement.setAttribute("muted", "true");
+                    // videoElement.setAttribute("playsinline", "true");
+                    videoElement.autoplay = true;
+                    videoElement.muted = true;
+                    videoElement.playsinline = true;
+                    
+                    videoPlayer.append(videoElement);
+                    hmsActions.attachVideo(hostVideoPeer.videoTrack, videoElement);
+                }
+            }
+
+            window.onload = async () => {
+                const params = new Proxy(new URLSearchParams(window.location.search), {
+                    get: (searchParams, prop) => searchParams.get(prop),
+                });
+
+                const authToken = params.authToken;
+
+                hmsStore.subscribe(onConnection, selectIsConnectedToRoom); // once if connected
+                
+                const config = {
+                    userName: "Recording",
+                    authToken: authToken,
+                    settings: {
+                        isAudioMuted: true,
+                        isVideoMuted: true,
+                    }
+                };
+
+                await hmsActions.join(config);
+            };
+
+            window.onunload = async () => {
+                await hmsActions.leave();
+            }
+        } catch (err) {
+            console.log("Error occured:", err);
+        }
+    </script>
+  </head>
+
+  <body>
+    Meeting
+    <div id="meetingId"></div>
+  </body>
+
+</html>
