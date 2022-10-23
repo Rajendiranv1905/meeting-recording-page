@@ -3,10 +3,14 @@
   <head>
     <title>Meeting</title>
 
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <style>
         body{
             margin: 0;
         }
+        
         .bottom_video{
             position: absolute;
             bottom: 0;
@@ -52,13 +56,46 @@
                     const videoPlayer = document.getElementById("meetingId");
                     videoPlayer.innerHTML = "";
 
-                    const videoElement = document.createElement('video');
-                    videoElement.autoplay = true;
-                    videoElement.muted = true;
-                    videoElement.playsinline = true;
-                    
-                    videoPlayer.append(videoElement);
-                    hmsActions.attachVideo(hostVideoPeer.videoTrack, videoElement);
+                    if (hostVideoPeer.auxiliaryTracks.length) {
+                        // screen share view
+                        const screenShareElement = document.createElement('video');
+                        screenShareElement.style.width = "100%";
+                        screenShareElement.style.height = "100%";
+                        screenShareElement.id = "screen-share-view"
+                        screenShareElement.autoplay = true;
+                        screenShareElement.muted = true;
+                        screenShareElement.playsinline = true;
+                        
+                        videoPlayer.append(screenShareElement);
+                        hmsActions.attachVideo(hostVideoPeer.auxiliaryTracks[0], screenShareElement);
+
+                        // host view
+                        const divContainerElement = document.createElement("div");
+                        divContainerElement.className = "bottom_video";
+                        const videoElement = document.createElement('video');
+                        videoElement.style.width = "300px";
+                        videoElement.style.height = "300px";
+                        videoElement.id = "host-view";
+                        videoElement.autoplay = true;
+                        videoElement.muted = true;
+                        videoElement.playsinline = true;
+                        
+                        divContainerElement.append(videoElement);
+                        videoPlayer.append(divContainerElement);
+                        hmsActions.attachVideo(hostVideoPeer.videoTrack, videoElement);
+                    } else {
+                        // host view
+                        const videoElement = document.createElement('video');
+                        videoElement.style.width = "100%";
+                        videoElement.style.height = "100%";
+                        videoElement.id = "host-view";
+                        videoElement.autoplay = true;
+                        videoElement.muted = true;
+                        videoElement.playsinline = true;
+                        
+                        videoPlayer.append(videoElement);
+                        hmsActions.attachVideo(hostVideoPeer.videoTrack, videoElement);
+                    }
                 }
             }
 
