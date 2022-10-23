@@ -3,6 +3,17 @@
   <head>
     <title>Meeting</title>
 
+    <style>
+        body{
+            margin: 0;
+        }
+        .bottom_video{
+            position: absolute;
+            bottom: 0;
+            right: 0;
+        }
+    </style>
+
     <script type="module">
         import {
             HMSReactiveStore,
@@ -31,7 +42,7 @@
                     peers = hmsStore.getState(selectPeers);
                     console.log(peers, "peers peers");
 
-                    const hostVideoPeer = peers.find((peer) => peer.roleName === "host" && !peer.isLocal && peer.name === "raj");
+                    const hostVideoPeer = peers.find((peer) => peer.roleName === "host" && !peer.isLocal);
 
                     if (!hostVideoPeer) {
                         console.log("peer not found");
@@ -42,9 +53,6 @@
                     videoPlayer.innerHTML = "";
 
                     const videoElement = document.createElement('video');
-                    // videoElement.setAttribute("autoplay", "true");
-                    // videoElement.setAttribute("muted", "true");
-                    // videoElement.setAttribute("playsinline", "true");
                     videoElement.autoplay = true;
                     videoElement.muted = true;
                     videoElement.playsinline = true;
@@ -85,7 +93,6 @@
   </head>
 
   <body>
-    Meeting
     <div id="meetingId"></div>
   </body>
 
